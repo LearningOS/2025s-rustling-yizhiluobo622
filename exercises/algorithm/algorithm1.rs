@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,14 +69,45 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self where T: PartialOrd,
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut merged_list = LinkedList::new();
+    
+    // 获取两个链表的当前节点
+    let mut node_a = list_a.start;
+    let mut node_b = list_b.start;
+    
+    // 合并两个链表
+    while node_a.is_some() && node_b.is_some() {
+        let a_val = unsafe { &(*node_a.unwrap().as_ptr()).val };
+        let b_val = unsafe { &(*node_b.unwrap().as_ptr()).val };
+        
+        if a_val <= b_val {
+            // 添加list_a的当前节点
+            let next_a = unsafe { (*node_a.unwrap().as_ptr()).next };
+            merged_list.add(unsafe { std::ptr::read(&(*node_a.unwrap().as_ptr()).val) });
+            node_a = next_a;
+        } else {
+            // 添加list_b的当前节点
+            let next_b = unsafe { (*node_b.unwrap().as_ptr()).next };
+            merged_list.add(unsafe { std::ptr::read(&(*node_b.unwrap().as_ptr()).val) });
+            node_b = next_b;
         }
+    }
+    
+    // 处理剩余的list_a节点
+    while let Some(node) = node_a {
+        merged_list.add(unsafe { std::ptr::read(&(*node.as_ptr()).val) });
+        node_a = unsafe { (*node.as_ptr()).next };
+    }
+    
+    // 处理剩余的list_b节点
+    while let Some(node) = node_b {
+        merged_list.add(unsafe { std::ptr::read(&(*node.as_ptr()).val) });
+        node_b = unsafe { (*node.as_ptr()).next };
+    }
+    
+    merged_list
 	}
 }
 
